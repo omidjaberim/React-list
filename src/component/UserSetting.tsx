@@ -36,7 +36,7 @@ const useStyles = makeStyles<Theme, StyleProps>({
   },
   night: { cursor: "pointer", fill: "rgba(255, 168, 46, 1) !important" },
   container: {
-    width: "920px ",
+    width: "80%",
     padding: 30,
     margin: "35px 0px",
   },
@@ -190,15 +190,54 @@ const UserSetting = () => {
       setLoading(false);
     }, 1000);
   };
+  const [selectedItem, setSelectedItem] = useState<{
+    title: string;
+    icon: React.ReactNode;
+    link: string;
+    id: number;
+  } | null>(null);
+
+  const showEditPanel = (item: {
+    title: string;
+    icon: React.ReactNode;
+    link: string;
+    id: number;
+  }) => {
+    setSelectedItem(item);
+  };
+  const updateSocial = () => {
+    setLsit((prev) => {
+      const list4Update = [...prev];
+      const index = list4Update.findIndex(
+        (l4up) => l4up.id === selectedItem?.id
+      );
+      if (index !== -1) {
+        list4Update.splice(index, 1, {
+          ...selectedItem,
+          link: newLink,
+          title: socialMedia,
+          icon: selectedItem?.icon,
+          id: Number(selectedItem?.id),
+        });
+      }
+      return list4Update;
+    });
+    setSelectedItem(null);
+  };
   const styles = useStyles({ isVisible });
   const key = useId();
-  console.log(list, "lisst");
   return (
     <Grid container className={styles.root} justifyContent="center">
       <Backdrop sx={{ color: "#fff", zIndex: 9 }} open={loading}>
         <CircularProgress color="inherit" />
       </Backdrop>
-      <Grid className={styles.container} direction="column">
+      <Grid
+        container
+        item
+        xs={8}
+        direction="column"
+        className={styles.container}
+      >
         <Grid container justifyContent="space-between">
           <Typography color="white" className={styles.setting}>
             تنظیمات کاربری
@@ -254,7 +293,13 @@ const UserSetting = () => {
                   justifyContent={"end"}
                   alignItems="center"
                 >
-                  <Grid xs={6} item container justifyContent={"center"}>
+                  <Grid
+                    xs={6}
+                    item
+                    container
+                    justifyContent={"center"}
+                    onClick={() => showEditPanel(item)}
+                  >
                     <EditIcon className={styles.edit} />
                     <Typography color="primary">ویرایش</Typography>
                   </Grid>
@@ -268,6 +313,18 @@ const UserSetting = () => {
                     <DeleteIcon className={styles.delete} />
                     <Typography color={"red"}>حذف</Typography>
                   </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  <Collapse in={!!selectedItem && item.id === selectedItem.id}>
+                    <ConnectionAddEdit
+                      hide={() => setSelectedItem(null)}
+                      socialList={socialList}
+                      saveSocial={updateSocial}
+                      socialMedia={socialMedia}
+                      handleChange={handleChange}
+                      handleTxt={handleTxt}
+                    />
+                  </Collapse>
                 </Grid>
               </Grid>
             ))}
